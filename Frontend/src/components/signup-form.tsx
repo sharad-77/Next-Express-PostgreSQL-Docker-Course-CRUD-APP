@@ -1,14 +1,13 @@
 'use client';
 
-import { createUser } from '@/apis/apis';
+import { createUser } from '@/app/apis/apis';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Field, FieldDescription, FieldGroup, FieldLabel } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import Link from 'next/link';
-import { useForm } from 'react-hook-form';
 import { useRouter } from 'next/navigation';
-
+import { useForm } from 'react-hook-form';
 
 export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
   const { register, handleSubmit, reset } = useForm();
@@ -22,7 +21,7 @@ export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
       console.log('API Response:', response);
 
       alert('Account created successfully!');
-      router.push("/login")
+      router.push('/login');
       reset();
     } catch (error) {
       console.log(error);

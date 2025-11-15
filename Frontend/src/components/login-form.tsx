@@ -1,17 +1,18 @@
 'use client';
 
-import { loginUser } from '@/apis/apis';
+import { loginUser } from '@/app/apis/apis';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Field, FieldDescription, FieldGroup, FieldLabel } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
-import api from '@/lib/api';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
+import { useAuth } from "@/hooks/useAuth";
 
 export function LoginForm({ className, ...props }: React.ComponentProps<'div'>) {
+  const { login } = useAuth();
   const { register, handleSubmit, reset } = useForm();
   const router = useRouter();
 
@@ -20,14 +21,13 @@ export function LoginForm({ className, ...props }: React.ComponentProps<'div'>) 
       const response = await loginUser(data);
 
       const token = response.token;
+
       if (!token) {
         alert('Token not found in response!');
         return;
       }
 
-      localStorage.setItem('token', token);
-
-      api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+      login(response.token);
 
       alert('Login successful!');
       router.push('/');

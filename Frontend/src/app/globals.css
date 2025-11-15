@@ -4,8 +4,7 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
-  --animate-cell-ripple: cell-ripple var(--duration, 200ms) ease-out none 1
-    var(--delay, 0ms);
+  --animate-cell-ripple: cell-ripple var(--duration, 200ms) ease-out none 1 var(--delay, 0ms);
 
   @keyframes cell-ripple {
     0% {
@@ -18,6 +17,23 @@
       opacity: 0.4;
     }
   }
+
+  @keyframes slideDown {
+    from {
+      opacity: 0;
+      transform: translateY(-6px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* ❗ REMOVE THIS FROM HERE — moved below
+  .animate-slideDown {
+    animation: slideDown 0.25s ease-out both;
+  }
+  */
 
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -56,6 +72,11 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
+}
+
+/* ✅ Correct place for animations using classes */
+.animate-slideDown {
+  animation: slideDown 0.25s ease-out both;
 }
 
 :root {

@@ -1,4 +1,5 @@
 import Navbar from '@/components/layout/Navbar';
+import { AuthProvider } from '@/context/AuthContext';
 import type { Metadata } from 'next';
 import { ThemeProvider } from 'next-themes';
 import { Geist, Geist_Mono } from 'next/font/google';
@@ -27,10 +28,12 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body>
-        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-          <Navbar />
-          <main>{children}</main>
-        </ThemeProvider>
+        <AuthProvider>
+          <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+            <Navbar />
+            <main>{children}</main>
+          </ThemeProvider>
+        </AuthProvider>
       </body>
     </html>
   );
