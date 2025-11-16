@@ -10,7 +10,6 @@ const FRONTEND_URL = process.env.FRONTEND_URL;
 
 const app = express();
 
-// Helmet (CORS safe)
 app.use(helmet({
   crossOriginResourcePolicy: false,
   crossOriginOpenerPolicy: false,
@@ -19,7 +18,6 @@ app.use(helmet({
 
 app.use(express.json());
 
-// CORS (just ONE origin)
 app.use(cors({
   origin: FRONTEND_URL,
   methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
@@ -27,14 +25,10 @@ app.use(cors({
   credentials: true,
 }));
 
-// Preflight handler
-app.options("*", cors());
 
-// Rate Limit
 const limiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 100 });
 app.use(limiter);
 
-// Routes
 import { courseRoutes } from './routes/courseRoutes';
 import { userRoutes } from './routes/userRoutes';
 
