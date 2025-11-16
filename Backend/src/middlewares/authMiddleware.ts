@@ -3,7 +3,10 @@ import { NextFunction, Request, Response } from "express";
 import jwt, { JwtPayload } from "jsonwebtoken";
 dotenv.config();
 
-const JWTSECRET = process.env.JWT_SECRET!;
+const JWTSECRET = process.env.JWT_SECRET;
+if (!JWTSECRET) {
+  throw new Error('JWT_SECRET environment variable is not set');
+}
 
 export const authMiddleware = (req:Request, res:Response, next:NextFunction) => {
   try{
@@ -22,3 +25,4 @@ export const authMiddleware = (req:Request, res:Response, next:NextFunction) => 
     return res.status(401).json({ message : "Invalid or Expired token"});
   }
 }
+

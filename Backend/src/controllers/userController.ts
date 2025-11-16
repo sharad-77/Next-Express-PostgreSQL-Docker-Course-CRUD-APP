@@ -5,7 +5,10 @@ import jwt from 'jsonwebtoken';
 import { prisma } from '../lib/prisma';
 dotenv.config();
 
-const jwtSecret = process.env.JWT_SECRET!;
+const jwtSecret = process.env.JWT_SECRET;
+if (!jwtSecret) {
+  throw new Error('JWT_SECRET environment variable is not set');
+}
 
 export const createUser = async (
   req: Request,
@@ -77,7 +80,7 @@ export const login = async (req: Request, res: Response) => {
     const payload = { userID, email };
     const token = jwt.sign(payload,jwtSecret,{expiresIn:'7d'});
 
-    res.setHeader("Authorixation",'Bearer ${token}');
+    res.setHeader("Authorization",`Bearer ${token}`);
 
     return res.json({ mesaage: 'Login Successfully', token });
   } catch (error) {
@@ -85,3 +88,4 @@ export const login = async (req: Request, res: Response) => {
     res.status(500).json({ message: 'something went wrong in Login' });
   }
 };
+
