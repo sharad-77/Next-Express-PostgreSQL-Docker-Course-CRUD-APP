@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Trash } from 'lucide-react';
 import { FieldArrayPath, useFieldArray, useForm } from 'react-hook-form';
+import { toast } from 'sonner';
 
 export interface CourseFormType {
   title: string;
@@ -38,7 +39,7 @@ export default function CourseForm() {
 
       console.log('API Response:', res);
 
-      alert('Course Created Successfully!');
+      toast.success('Course Created Successfully!');
 
       reset({
         title: '',
@@ -48,7 +49,7 @@ export default function CourseForm() {
       });
     } catch (error) {
       console.error('Error Creating Course:', error);
-      alert('Failed to create course');
+      toast.error('Failed to create course');
     }
   };
 

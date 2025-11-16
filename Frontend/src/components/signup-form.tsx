@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
+import { toast } from 'sonner';
 
 export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
   const { register, handleSubmit, reset } = useForm();
@@ -20,12 +21,12 @@ export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
       const response = await createUser(data);
       console.log('API Response:', response);
 
-      alert('Account created successfully!');
+      toast.success('Account created successfully!');
       router.push('/login');
       reset();
     } catch (error) {
       console.log(error);
-      alert('Failed to create account!');
+      toast.error('Failed to create account!');
     }
   };
 

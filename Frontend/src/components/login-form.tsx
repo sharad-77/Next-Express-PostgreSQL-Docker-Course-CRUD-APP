@@ -9,6 +9,7 @@ import { cn } from '@/lib/utils';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
+import { toast } from 'sonner';
 import { useAuth } from "@/hooks/useAuth";
 
 export function LoginForm({ className, ...props }: React.ComponentProps<'div'>) {
@@ -19,22 +20,18 @@ export function LoginForm({ className, ...props }: React.ComponentProps<'div'>) 
   const onSubmit = async (data: object) => {
     try {
       const response = await loginUser(data);
-
       const token = response.token;
-
       if (!token) {
-        alert('Token not found in response!');
+        toast.error('Token not found in response!');
         return;
       }
-
       login(response.token);
-
-      alert('Login successful!');
+      toast.success('Login successful!');
       router.push('/');
       reset();
     } catch (error) {
       console.error(error);
-      alert('Invalid email or password!');
+      toast.error('Invalid email or password!');
     }
   };
 

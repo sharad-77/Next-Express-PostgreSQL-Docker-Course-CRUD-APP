@@ -40,6 +40,7 @@ interface ErrorInfo {
     | "unknown";
 }
 
+
 const getErrorMessage = (error: AxiosError<ApiErrorResponse>): ErrorInfo => {
   const { response, message } = error;
 
@@ -60,53 +61,55 @@ const getErrorMessage = (error: AxiosError<ApiErrorResponse>): ErrorInfo => {
 
   switch (status) {
     case 400:
-      return {
-        title: "Bad Request",
-        description: errorMessage,
-        type: "validation",
-      };
-    case 401:
-      return {
-        title: "Unauthorized",
-        description: "Your session has expired. Please login again.",
-        type: "auth",
-      };
-    case 403:
-      return {
-        title: "Access Denied",
-        description: "You don't have permission to perform this action.",
-        type: "permission",
-      };
-    case 404:
-      return {
-        title: "Not Found",
-        description: "Requested resource not found.",
-        type: "not_found",
-      };
-    case 409:
-      return {
-        title: "Conflict",
-        description: errorMessage,
-        type: "conflict",
-      };
     case 422:
       return {
         title: "Validation Error",
         description: errorMessage,
         type: "validation",
       };
+
+    case 401:
+      return {
+        title: "Unauthorized",
+        description: "Your session has expired. Please login again.",
+        type: "auth",
+      };
+
+    case 403:
+      return {
+        title: "Access Denied",
+        description: "You don't have permission to perform this action.",
+        type: "permission",
+      };
+
+    case 404:
+      return {
+        title: "Not Found",
+        description: "Requested resource not found.",
+        type: "not_found",
+      };
+
+    case 409:
+      return {
+        title: "Conflict",
+        description: errorMessage,
+        type: "conflict",
+      };
+
     case 429:
       return {
         title: "Too Many Requests",
         description: "Please wait and try again.",
         type: "rate_limit",
       };
+
     case 500:
       return {
         title: "Server Error",
         description: "Something went wrong on our server.",
         type: "server",
       };
+
     default:
       return {
         title: "Request Failed",
@@ -115,7 +118,6 @@ const getErrorMessage = (error: AxiosError<ApiErrorResponse>): ErrorInfo => {
       };
   }
 };
-
 
 const getBaseURL = (): string => `${BACKEND_URL}/api/v1`;
 
@@ -145,6 +147,7 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
+
 api.interceptors.response.use(
   (response: AxiosResponse) => response,
   (error: AxiosError<ApiErrorResponse>) => {
@@ -152,12 +155,9 @@ api.interceptors.response.use(
 
     if (errorInfo.type === "auth") {
       localStorage.removeItem("token");
-      alert(`${errorInfo.title}\n\n${errorInfo.description}`);
-      window.location.href = "/login";
-      return Promise.reject(error);
+      window.location.assign("/login");
+      return Promise.reject(errorInfo);
     }
-
-    alert(`${errorInfo.title}\n\n${errorInfo.description}`);
 
     if (process.env.NODE_ENV === "development") {
       const meta = error.config?.metadata;
@@ -171,7 +171,7 @@ api.interceptors.response.use(
       });
     }
 
-    return Promise.reject(error);
+    return Promise.reject(errorInfo);
   }
 );
 
