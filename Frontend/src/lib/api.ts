@@ -1,46 +1,177 @@
 "use client";
 
-import axios from "axios";
+import axios, {
+  AxiosError,
+  AxiosResponse,
+  InternalAxiosRequestConfig,
+} from "axios";
 
-const BACKENDURL = process.env.NEXT_PUBLIC_API_URL;
+const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL;
+
+interface ApiErrorResponse {
+  message?: string;
+  error?: string;
+  details?: unknown;
+}
+
+interface RequestMeta {
+  startTime: number;
+  requestId: string;
+}
+
+declare module "axios" {
+  export interface InternalAxiosRequestConfig {
+    metadata?: RequestMeta;
+  }
+}
+
+interface ErrorInfo {
+  title: string;
+  description: string;
+  type:
+    | "network"
+    | "validation"
+    | "auth"
+    | "permission"
+    | "not_found"
+    | "conflict"
+    | "rate_limit"
+    | "server"
+    | "unknown";
+}
+
+const getErrorMessage = (error: AxiosError<ApiErrorResponse>): ErrorInfo => {
+  const { response, message } = error;
+
+  if (!response) {
+    return {
+      title: "Network Error",
+      description: "Unable to connect to the server.",
+      type: "network",
+    };
+  }
+
+  const status = response.status;
+  const errorMessage =
+    response.data?.message ||
+    response.data?.error ||
+    message ||
+    "Unknown error";
+
+  switch (status) {
+    case 400:
+      return {
+        title: "Bad Request",
+        description: errorMessage,
+        type: "validation",
+      };
+    case 401:
+      return {
+        title: "Unauthorized",
+        description: "Your session has expired. Please login again.",
+        type: "auth",
+      };
+    case 403:
+      return {
+        title: "Access Denied",
+        description: "You don't have permission to perform this action.",
+        type: "permission",
+      };
+    case 404:
+      return {
+        title: "Not Found",
+        description: "Requested resource not found.",
+        type: "not_found",
+      };
+    case 409:
+      return {
+        title: "Conflict",
+        description: errorMessage,
+        type: "conflict",
+      };
+    case 422:
+      return {
+        title: "Validation Error",
+        description: errorMessage,
+        type: "validation",
+      };
+    case 429:
+      return {
+        title: "Too Many Requests",
+        description: "Please wait and try again.",
+        type: "rate_limit",
+      };
+    case 500:
+      return {
+        title: "Server Error",
+        description: "Something went wrong on our server.",
+        type: "server",
+      };
+    default:
+      return {
+        title: "Request Failed",
+        description: errorMessage,
+        type: "unknown",
+      };
+  }
+};
+
+
+const getBaseURL = (): string => `${BACKEND_URL}/api/v1`;
 
 const api = axios.create({
-  baseURL: `${BACKENDURL}/api/v1`,
+  baseURL: getBaseURL(),
+  timeout: 15000,
   withCredentials: true,
+  headers: { "Content-Type": "application/json" },
 });
 
 api.interceptors.request.use(
-  (config) => {
+  (config: InternalAxiosRequestConfig) => {
     if (typeof window !== "undefined") {
       const token = localStorage.getItem("token");
       if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
+        config.headers["Authorization"] = `Bearer ${token}`;
       }
     }
+
+    config.metadata = {
+      startTime: Date.now(),
+      requestId: Math.random().toString(36).substring(2),
+    };
+
     return config;
   },
   (error) => Promise.reject(error)
 );
 
 api.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    if (typeof window !== "undefined") {
-      let message = "Something went wrong";
+  (response: AxiosResponse) => response,
+  (error: AxiosError<ApiErrorResponse>) => {
+    const errorInfo = getErrorMessage(error);
 
-      if (error.response?.status === 401) {
-        localStorage.removeItem("token");
-        window.location.href = "/login";
-        message = "Unauthorized. Please login again.";
-      }
-      else if (error.response) {
-        message = error.response.data?.message || message;
-      }
-
-      alert(message);
+    if (errorInfo.type === "auth") {
+      localStorage.removeItem("token");
+      alert(`${errorInfo.title}\n\n${errorInfo.description}`);
+      window.location.href = "/login";
+      return Promise.reject(error);
     }
 
-    return Promise.reject(new Error("Request failed"));
+    alert(`${errorInfo.title}\n\n${errorInfo.description}`);
+
+    if (process.env.NODE_ENV === "development") {
+      const meta = error.config?.metadata;
+      console.error("❌ API Error Debug:", {
+        status: error.response?.status,
+        message: error.response?.data?.message,
+        url: error.config?.url,
+        method: error.config?.method,
+        duration: meta ? Date.now() - meta.startTime : undefined,
+        requestId: meta?.requestId,
+      });
+    }
+
+    return Promise.reject(error);
   }
 );
 
