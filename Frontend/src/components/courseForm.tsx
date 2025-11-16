@@ -7,14 +7,14 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Trash } from 'lucide-react';
-import { useFieldArray, useForm } from 'react-hook-form';
+import { FieldArrayPath, useFieldArray, useForm } from 'react-hook-form';
 
-type CourseFormType = {
+export interface CourseFormType {
   title: string;
   price: string;
   shortDescription: string;
   courseHighlight: string[];
-};
+}
 
 export default function CourseForm() {
   const { register, handleSubmit, reset, control } = useForm<CourseFormType>({
@@ -28,9 +28,8 @@ export default function CourseForm() {
 
   const { fields, append, remove } = useFieldArray({
     control,
-    name: 'courseHighlight',
+    name: 'courseHighlight' as FieldArrayPath<CourseFormType>,
   });
-
   const onSubmit = async (data: CourseFormType) => {
     try {
       console.log('Sending Course Data:', data);
@@ -100,7 +99,7 @@ export default function CourseForm() {
                   <div key={field.id} className="flex gap-2 items-start">
                     <Input
                       placeholder={`Highlight ${index + 1}`}
-                      {...register(`courseHighlight.${index}`)}
+                      {...register(`courseHighlight.${index}` as const)}
                     />
 
                     <Button
