@@ -1,7 +1,11 @@
+"use client"
+
 import axios from "axios";
 
+const FRONTENDURL = process.env.NEXT_PUBLIC_API_URL;
+
 const api = axios.create({
-  baseURL: `${process.env.NEXT_PUBLIC_API_URL}/api/v1`,
+  baseURL: `${FRONTENDURL}/api/v1`,
   withCredentials: true,
 });
 

@@ -9,9 +9,8 @@ export default function Home() {
           Learn New Skills. Build Your Future
         </h2>
         <p className="relative z-10 mx-auto mt-4 max-w-xl text-center text-neutral-800 dark:text-neutral-500">
-          We believe learning should be simple, engaging, and practical. That’s
-          why we built a platform that focuses on skill-based education, not
-          just theory.
+          We believe learning should be simple, engaging, and practical. That’s why we built a
+          platform that focuses on skill-based education, not just theory.
         </p>
       </div>
     </div>
